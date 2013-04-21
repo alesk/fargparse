@@ -1,5 +1,5 @@
 from distutils.core import setup
-setup(name='sequtil',
+setup(name='fargparse',
       version='0.1',
       py_modules=['fargparse'],
       author_email='ales.kotnik@gmail.com',
