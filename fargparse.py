@@ -5,21 +5,27 @@ parser in fully declerative manner.
 import argparse
 import importlib
 
-def create_parser(parser_defs):
-
+def create_parser(defs):
     def init_parser(parser, parser_dict):
         parser.set_defaults(**parser_dict.get('defaults', {}))
-        [parser.add_argument(*name.split(','), **opts) for name, opts in parser_dict.get('arguments', {}).items()]
+        [ parser.add_argument(*name.split(','), **opts) for name, opts in parser_dict.get('arguments', {}).items()]
 
         subparsers = parser_dict.get('subparsers', {})
         if len(subparsers.keys()):
             subparsers_ = parser.add_subparsers(help='sub-command help')
-            for name, opts in subparsers.items():
-                s = subparsers_.add_parser(name)
-                init_parser(s, opts)
 
-    parser = argparse.ArgumentParser()
-    init_parser(parser, parser_defs)
+            for name, opts in subparsers.items():
+                parents_ = filter(lambda x:x,
+                    [ parents.get(p) for p in opts.get('parents', [])])
+                s = subparsers_.add_parser(name, parents=parents_)
+                init_parser(s, opts)
+        return parser
+
+    parents = dict([ (k, init_parser(argparse.ArgumentParser(add_help=False), v))
+                 for k,v in defs.get('parent_parsers', {}).items()])
+    parser = argparse.ArgumentParser(
+        parents= [ parents[p] for p in defs.get('parents', [])])
+    init_parser(parser, defs)
     return parser
 
 
@@ -34,6 +40,7 @@ def parse_arguments(parser):
         return getattr(module, func), kwargs
     else:
         return func, kwargs
+
 
 def run(parser):
     func, kwargs = parse_arguments(parser)
