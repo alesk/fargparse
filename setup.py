@@ -1,6 +1,6 @@
 from distutils.core import setup
 setup(name='fargparse',
-      version='0.1',
+      version='0.2',
       py_modules=['fargparse'],
       author_email='ales.kotnik@gmail.com',
       url='https://github.com/alesk/fargparse.git',
